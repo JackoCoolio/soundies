@@ -91,6 +91,18 @@ client.on('message', msg => {
     if (msg.guild.voiceConnection) msg.guild.voiceConnection.disconnect();
   } else if (cmd == 'start') {
     playQueue(msg.member.voiceChannel, server);
+  } else if (cmd == 'help') {
+    let embed = new Discord.RichEmbed()
+    .setTitle('Help')
+    .setDescription('?help')
+    .addField('add <link>','Add a link to the queue.')
+    .addField('clear','Clear the queue.')
+    .addField('skip','Skip the currently playing song.')
+    .addField('stop','Stop playing.')
+    .addField('start','Start the queue. Using `?add` will do the same thing.')
+    .addField('help','Display this message.');
+
+    msg.channel.send(embed).then(() => {console.log('Sent help message.')}).catch(console.error);
   }
   msg.delete();
 });
