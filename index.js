@@ -67,7 +67,7 @@ client.on('message', msg => {
         requester: msg.author,
         title: info.title
       });
-  
+
       if (!queue.playing) {
         playQueue(msg.member.voiceChannel, server);
       }
@@ -159,4 +159,4 @@ function historyEmbed(serverData, song) {
   }
 }
 
-client.login('MzM4MDIzMjU3MTU0Mzg3OTkx.DFPYNQ.DOh_yMP1M4yX0xrO9sbGVPGgHOk');
+client.login(process.env.TOKEN);
