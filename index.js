@@ -143,6 +143,7 @@ function playSong(song, channel, serverData) {
     } catch (e) {console.error(e)}
   }
   channel.join().then(connection => {
+    if (!song.url) serverData.dispatcher.end();
     serverData.dispatcher = connection.playStream(ytdl(song.url, {filter: 'audioonly'}));
 
     historyEmbed(serverData, song);
@@ -168,7 +169,7 @@ function historyEmbed(serverData, song) {
       ]
     );
     embed.setTitle(song.title);
-    histChannel.send(embed).then(m => console.log('Playing: ' + info.title)).catch(console.error);
+    histChannel.send(embed).then(m => console.log('Playing: ' + song.title)).catch(console.error);
   }
 }
 
