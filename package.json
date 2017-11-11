@@ -18,5 +18,10 @@
   "bugs": {
     "url": "https://github.com/JackoCoolio/soundies/issues"
   },
-  "homepage": "https://github.com/JackoCoolio/soundies#readme"
+  "homepage": "https://github.com/JackoCoolio/soundies#readme",
+  "dependencies": {
+    "discord.js": "^11.2.1",
+    "opusscript": "0.0.4",
+    "ytdl-core": "^0.18.1"
+  }
 }
