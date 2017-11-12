@@ -159,16 +159,17 @@ function playSong(song, channel, serverData) {
 function historyEmbed(serverData, song) {
   let histChannel = serverData.history_channel;
   if (histChannel) {
-    let embed = new Discord.RichEmbed();
-    embed.setDescription(`requested by ${song.requester.username}`);
-    embed.setColor(
+    let embed = new Discord.RichEmbed()
+    .setColor(
       [
         Math.floor(Math.random() * 256),
         Math.floor(Math.random() * 256),
         Math.floor(Math.random() * 256)
       ]
-    );
-    embed.setTitle(song.title);
+    )
+    .setTitle(song.title)
+    .setFooter(`Requested by ${song.requester.username}`,song.requester.user.avatarURL)
+    .setURL(song.url);
     histChannel.send(embed).then(m => console.log('Playing: ' + song.title)).catch(console.error);
   }
 }
