@@ -90,7 +90,16 @@ client.on('message', msg => {
     queue.playing = false;
     if (msg.guild.voiceConnection) msg.guild.voiceConnection.disconnect();
   } else if (cmd == 'start') {
-    playQueue(msg.member.voiceChannel, server);
+    if (queue.playing) {
+      if (params[0] == 'override') {
+        playQueue(msg.member.voiceChannel, server);
+      } else {
+        msg.channel.sendTimeout('Queue is already playing!');
+      }
+    } else {
+      playQueue(msg.member.voiceChannel, server);
+    }
+
   } else if (cmd == 'help') {
     let embed = new Discord.RichEmbed()
     .setTitle('Help')
@@ -103,6 +112,11 @@ client.on('message', msg => {
     .addField('help','Display this message.');
 
     msg.channel.send(embed).then(() => {console.log('Sent help message.')}).catch(console.error);
+  } else if (cmd == 'replay') {
+    if (!queue.previousSong) return msg.channel.sendTimeout('There is no song to replay!');
+    queue.playlist.push(queue.previousSong);
+    if (!queue.playing)
+      playQueue(msg.member.voiceChannel, server);
   }
   msg.delete();
 });
@@ -150,6 +164,7 @@ function playSong(song, channel, serverData) {
 
     serverData.dispatcher.on('end', () => {
       serverData.queue.index++;
+      serverData.queue.previousSong = song;
       if (serverData.queue.playing)
         playSong(serverData.queue.playlist[serverData.queue.index], channel, serverData);
     });
