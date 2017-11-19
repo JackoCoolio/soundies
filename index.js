@@ -1,9 +1,11 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const ytdl = require('ytdl-core');
+const fs = require('fs');
 require('dotenv').config();
 
 var servers = {};
+var aliases;
 
 Discord.TextChannel.prototype.sendTimeout = function(message, time) {
   this.send(message).then((m) => {
@@ -33,7 +35,12 @@ client.on('ready', () => {
     } else {
       guild.owner.user.sendMessage(`Your guild, ${guild.name}, does not have a \`play-history\` channel!`);
     }
+
+    aliases = JSON.parse(fs.readFileSync('./aliases.json'));
+    if (!aliases[guild]) aliases[guild] = {};
   });
+
+  updateAliases();
 
   console.log('Ready!');
 });
@@ -54,27 +61,10 @@ client.on('message', msg => {
   let server = servers[msg.guild];
   let queue = server.queue;
   let playlist = queue.playlist;
+  let aliasList= aliases[msg.guild];
 
   if (cmd == 'add') {
-    if (!params[0]) return msg.channel.send('Use `add <link>`');
-
-    let link = params[0];
-
-    if (!isYoutubeLink(link)) return msg.channel.sendTimeout('That is not a valid YouTube link.',2000);
-
-    getTitle(link, (err, info) => {
-      playlist.push({
-        url: link,
-        requester: msg.author,
-        title: info.title
-      });
-
-      if (!queue.playing) {
-        playQueue(msg.member.voiceChannel, server);
-      }
-
-      msg.channel.sendTimeout(`Added \`${info.title}\` to the queue.`,2000);
-    });
+    addToQueue(url, server);
   } else if (cmd == 'clear') {
     queue = {};
     msg.channel.sendTimeout('Queue cleared!',2000);
@@ -109,7 +99,10 @@ client.on('message', msg => {
     .addField('skip','Skip the currently playing song.')
     .addField('stop','Stop playing.')
     .addField('start','Start the queue. Using `?add` will do the same thing.')
+    .addField('alias <command> <link>', 'Create a command for your server.')
     .addField('help','Display this message.');
+    if (aliases.keys().length > 0)
+      embed.addField(`+${aliases.keys().length} aliases...`, 'Use `?aliases` to get a list of all of them!');
 
     msg.channel.send(embed).then(() => {console.log('Sent help message.')}).catch(console.error);
   } else if (cmd == 'replay') {
@@ -117,7 +110,23 @@ client.on('message', msg => {
     queue.playlist.push(queue.previousSong);
     if (!queue.playing)
       playQueue(msg.member.voiceChannel, server);
+  } else if (cmd == 'alias') {
+    let alias = params.shift();
+
+    let link = params.join(' ');
+
+    if (!isYoutubeLink(link)) return msg.channel.sendTimeout('That is not a valid YouTube link.',2000);
+
+    aliasList[alias] = script;
+    updateAliases();
+  } else if (cmd == 'aliases') {
+    msg.channel.sendTimeout('`?aliases` is currently under construction!');
   }
+
+  if (aliases.hasOwnProperty(cmd)) {
+    addToQueue(aliases[cmd], server);
+  }
+
   msg.delete();
 });
 
@@ -187,6 +196,34 @@ function historyEmbed(serverData, song) {
     .setURL(song.url);
     histChannel.send(embed).then(m => console.log('Playing: ' + song.title)).catch(console.error);
   }
+}
+
+function updateAliases() {
+  fs.writeFileSync('./aliases.json', JSON.stringify(aliases));
+}
+
+function addToQueue(url, server) {
+  if (!url) return msg.channel.send('Use `add <link>`');
+
+  let queue = server.queue;
+  let playlist = queue.playlist;
+  let link = url;
+
+  if (!isYoutubeLink(link)) return msg.channel.sendTimeout('That is not a valid YouTube link.',2000);
+
+  getTitle(link, (err, info) => {
+    playlist.push({
+      url: link,
+      requester: msg.author,
+      title: info.title
+    });
+
+    if (!queue.playing) {
+      playQueue(msg.member.voiceChannel, server);
+    }
+
+    msg.channel.sendTimeout(`Added \`${info.title}\` to the queue.`,2000);
+  });
 }
 
 client.login(process.env.BOT_TOKEN);
