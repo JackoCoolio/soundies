@@ -117,7 +117,7 @@ client.on('message', msg => {
 
     if (!isYoutubeLink(link)) return msg.channel.sendTimeout('That is not a valid YouTube link.',2000);
 
-    aliasList[alias] = script;
+    aliasList[alias] = link;
     updateAliases();
   } else if (cmd == 'aliases') {
     msg.channel.sendTimeout('`?aliases` is currently under construction!');
