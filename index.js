@@ -15,10 +15,9 @@ Discord.TextChannel.prototype.sendTimeout = function(message, time) {
 
 client.on('ready', () => {
 
+  aliases = JSON.parse(fs.readFileSync('./aliases.json'));
   client.guilds.forEach((guild, id, guilds) => {
-    if (!servers[guild]) servers[guild] = {
-      guild: guild
-    };
+    if (!servers[guild]) servers[guild] = {};
     let server = servers[guild];
 
     if (!server.queue) server.queue = {
@@ -36,8 +35,9 @@ client.on('ready', () => {
       guild.owner.user.sendMessage(`Your guild, ${guild.name}, does not have a \`play-history\` channel!`);
     }
 
-    aliases = JSON.parse(fs.readFileSync('./aliases.json'));
-    if (!aliases[guild]) aliases[guild] = {};
+
+    if (!aliases[guild]) aliases[guild] = {
+    };
   });
 
   updateAliases();
@@ -64,7 +64,7 @@ client.on('message', msg => {
   let aliasList= aliases[msg.guild];
 
   if (cmd == 'add') {
-    addToQueue(url, server);
+    addToQueue(msg, server);
   } else if (cmd == 'clear') {
     queue = {};
     msg.channel.sendTimeout('Queue cleared!',2000);
@@ -101,8 +101,8 @@ client.on('message', msg => {
     .addField('start','Start the queue. Using `?add` will do the same thing.')
     .addField('alias <command> <link>', 'Create a command for your server.')
     .addField('help','Display this message.');
-    if (aliases.keys().length > 0)
-      embed.addField(`+${aliases.keys().length} aliases...`, 'Use `?aliases` to get a list of all of them!');
+    if (aliasList.keys().length > 0)
+      embed.addField(`+${aliasList.keys().length} aliases...`, 'Use `?aliases` to get a list of all of them!');
 
     msg.channel.send(embed).then(() => {console.log('Sent help message.')}).catch(console.error);
   } else if (cmd == 'replay') {
@@ -123,8 +123,8 @@ client.on('message', msg => {
     msg.channel.sendTimeout('`?aliases` is currently under construction!');
   }
 
-  if (aliases.hasOwnProperty(cmd)) {
-    addToQueue(aliases[cmd], server);
+  if (aliasList.hasOwnProperty(cmd)) {
+    addToQueue(msg, server, aliasList[cmd]);
   }
 
   msg.delete();
@@ -202,12 +202,13 @@ function updateAliases() {
   fs.writeFileSync('./aliases.json', JSON.stringify(aliases));
 }
 
-function addToQueue(url, server) {
-  if (!url) return msg.channel.send('Use `add <link>`');
+function addToQueue(msg, server, overrideURL) {
+  console.log(`Added ${overrideURL} to the queue.`);
+  let link = (overrideURL)? overrideURL : msg.content.split(' ')[1];
+  if (!link) return msg.channel.send('Use `add <link>`');
 
   let queue = server.queue;
   let playlist = queue.playlist;
-  let link = url;
 
   if (!isYoutubeLink(link)) return msg.channel.sendTimeout('That is not a valid YouTube link.',2000);
 
