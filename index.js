@@ -50,6 +50,9 @@ client.on('message', msg => {
   if (msg.content.toLowerCase() == '?') return;
 
   if (!msg.content.startsWith('?')) return;
+
+  if (msg.content.charAt(1) == '?' || msg.content.charAt(1) == ' ') return;
+
   if (msg.channel.type == 'dm') {
     console.log("[DM]" + msg.author.username + ": " + msg.content);
   } else {
@@ -165,6 +168,7 @@ function playSong(song, channel, serverData) {
       serverData.guild.me.voiceChannel.leave();
     } catch (e) {console.error(e)}
   }
+  if (!channel) return;
   channel.join().then(connection => {
     if (!song.url) serverData.dispatcher.end();
     serverData.dispatcher = connection.playStream(ytdl(song.url, {filter: 'audioonly'}));
@@ -192,7 +196,7 @@ function historyEmbed(serverData, song) {
       ]
     )
     .setTitle(song.title)
-    .setFooter(`Requested by ${song.requester.username}`,song.requester.user.avatarURL)
+    .setFooter(`Requested by ${song.requester.username}`,song.requester.avatarURL)
     .setURL(song.url);
     histChannel.send(embed).then(m => console.log('Playing: ' + song.title)).catch(console.error);
   }
@@ -203,9 +207,11 @@ function updateAliases() {
 }
 
 function addToQueue(msg, server, overrideURL) {
-  console.log(`Added ${overrideURL} to the queue.`);
+
   let link = (overrideURL)? overrideURL : msg.content.split(' ')[1];
   if (!link) return msg.channel.send('Use `add <link>`');
+
+  console.log(`Added ${link} to the queue.`);
 
   let queue = server.queue;
   let playlist = queue.playlist;
