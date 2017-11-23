@@ -64,7 +64,7 @@ client.on('message', msg => {
   let aliasList= aliases[msg.guild];
 
   if (cmd == 'add') {
-    addToQueue(msg, server);
+    addToQueue(msg, server, params[0]);
   } else if (cmd == 'clear') {
     queue = {};
     msg.channel.sendTimeout('Queue cleared!',2000);
