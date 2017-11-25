@@ -64,9 +64,10 @@ client.on('message', msg => {
   let server = servers[msg.guild];
   let queue = server.queue;
   let playlist = queue.playlist;
-  let aliasList= aliases[msg.guild];
+  let aliasList = aliases[msg.guild];
 
-  if (cmd == 'add') {
+  if (cmd == 'ping') { return msg.channel.sendTimeout('Pong!'); }
+  else if (cmd == 'add') {
     addToQueue(msg, server, params[0]);
   } else if (cmd == 'clear') {
     queue = {};
@@ -124,12 +125,10 @@ client.on('message', msg => {
     updateAliases();
   } else if (cmd == 'aliases') {
     msg.channel.sendTimeout('`?aliases` is currently under construction!');
-  }
-
-  if (aliasList.hasOwnProperty(cmd)) {
+  } else if (aliasList.hasOwnProperty(cmd)) {
     addToQueue(msg, server, aliasList[cmd]);
   }
-
+  
   msg.delete();
 });
 
