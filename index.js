@@ -157,10 +157,11 @@ function playQueue(channel, serverData) {
   let queue = serverData.queue;
   if (queue.length == 0) return;
   queue.playing = true;
-  playSong(queue.playlist[queue.index], channel, serverData);
+  playSong(channel, serverData);
 }
 
-function playSong(song, channel, serverData) {
+function playSong(channel, serverData) {
+  let song = serverData.queue.playlist[serverData.queue.index];
   if (!song) {
     serverData.dispatcher.end();
     serverData.queue.playing = false;
@@ -179,7 +180,7 @@ function playSong(song, channel, serverData) {
       serverData.queue.index++;
       serverData.queue.previousSong = song;
       if (serverData.queue.playing)
-        playSong(serverData.queue.playlist[serverData.queue.index], channel, serverData);
+        playSong(channel, serverData);
     });
   }).catch(console.error);
 }
