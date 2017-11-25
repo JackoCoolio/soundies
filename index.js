@@ -7,7 +7,7 @@ require('dotenv').config();
 var servers = {};
 var aliases;
 
-Discord.TextChannel.prototype.sendTimeout = function(message, time) {
+Discord.TextChannel.prototype.sendTimeout = function(message, time = 2000) {
   this.send(message).then((m) => {
     setTimeout(function() {m.delete().then(console.log('Auto deleted message.')).catch(console.error)},time);
   }).catch(console.error);
@@ -128,7 +128,7 @@ client.on('message', msg => {
   } else if (aliasList.hasOwnProperty(cmd)) {
     addToQueue(msg, server, aliasList[cmd]);
   }
-  
+
   msg.delete();
 });
 
